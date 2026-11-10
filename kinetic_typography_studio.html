@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KineticForge - Kinetic Typography Motion Studio</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts for Kinetic Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Bungee&family=Cinzel:wght@600;900&family=Montserrat:wght@400;700;900&family=Outfit:wght@400;700;900&family=Playfair+Display:ital,wght@0,600;0,900;1,700&family=Righteous&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            syne: ['Syne', 'sans-serif'],
+            anton: ['Anton', 'sans-serif'],
+            montserrat: ['Montserrat', 'sans-serif'],
+            playfair: ['Playfair Display', 'serif'],
+            space: ['Space Grotesk', 'sans-serif'],
+            bungee: ['Bungee', 'cursive'],
+            bebas: ['Bebas Neue', 'sans-serif'],
+            righteous: ['Righteous', 'cursive'],
+            cinzel: ['Cinzel', 'serif'],
+            outfit: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            studio: {
+              950: '#090a0f',
+              900: '#0e1117',
+              850: '#131722',
+              800: '#1a1f2c',
+              700: '#282e3f',
+              accent: '#6366f1',
+              accentHover: '#4f46e5',
+              glow: '#38bdf8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0e1117;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #282e3f;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4f46e5;
+    }
+
+    /* Checkerboard pattern for transparent canvas */
+    .checker-bg {
+      background-color: #111;
+      background-image: 
+        linear-gradient(45deg, #1d212c 25%, transparent 25%), 
+        linear-gradient(-45deg, #1d212c 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #1d212c 75%), 
+        linear-gradient(-45deg, transparent 75%, #1d212c 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+
+    /* Range slider custom styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: #282e3f;
+      border-radius: 9999px;
+      height: 6px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #6366f1;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
+      transition: transform 0.1s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+
+<body class="bg-studio-950 text-gray-200 min-h-screen flex flex-col font-sans select-none overflow-hidden">
+
+  <!-- TOP APP BAR -->
+  <header class="h-14 border-b border-studio-800 bg-studio-900 px-4 flex items-center justify-between shrink-0 z-20">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+        <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+      </div>
+      <div>
+        <h1 class="font-bold text-sm tracking-wide text-white flex items-center gap-2">
+          KineticForge <span class="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Studio v2.5</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Quick Presets Dropdown / Buttons -->
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-gray-400 hidden sm:inline">Presets:</span>
+      <div class="flex items-center gap-1.5 overflow-x-auto py-1">
+        <button onclick="loadPreset('cyberpunk')" class="px-2.5 py-1 text-xs rounded-md bg-studio-800 hover:bg-studio-700 text-yellow-400 border border-yellow-500/20 transition-all font-medium flex items-center gap-1.5">
+          <i data-lucide="zap" class="w-3 h-3 text-yellow-400"></i> Cyberpunk
+        </button>
+        <button onclick="loadPreset('minimal')" class="px-2.5 py-1 text-xs rounded-md bg-studio-800 hover:bg-studio-700 text-zinc-300 border border-zinc-500/20 transition-all font-medium flex items-center gap-1.5">
+          <i data-lucide="feather" class="w-3 h-3 text-zinc-300"></i> Minimal
+        </button>
+        <button onclick="loadPreset('hypebeast')" class="px-2.5 py-1 text-xs rounded-md bg-studio-800 hover:bg-studio-700 text-red-400 border border-red-500/20 transition-all font-medium flex items-center gap-1.5">
+          <i data-lucide="flame" class="w-3 h-3 text-red-400"></i> Hypebeast
+        </button>
+        <button onclick="loadPreset('synthwave')" class="px-2.5 py-1 text-xs rounded-md bg-studio-800 hover:bg-studio-700 text-pink-400 border border-pink-500/20 transition-all font-medium flex items-center gap-1.5">
+          <i data-lucide="disc" class="w-3 h-3 text-pink-400"></i> Synthwave
+        </button>
+        <button onclick="loadPreset('cinema')" class="px-2.5 py-1 text-xs rounded-md bg-studio-800 hover:bg-studio-700 text-amber-300 border border-amber-500/20 transition-all font-medium flex items-center gap-1.5">
+          <i data-lucide="film" class="w-3 h-3 text-amber-300"></i> Cinematic
+        </button>
+      </div>
+    </div>
+
+    <!-- Actions / Export Buttons -->
+    <div class="flex items-center gap-2">
+      <button onclick="captureSnapshot()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-studio-800 hover:bg-studio-700 text-xs font-medium text-gray-200 transition-all border border-studio-700">
+        <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+        <span>Snapshot PNG</span>
+      </button>
+
+      <button id="recordBtn" onclick="toggleRecording()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-lg shadow-indigo-600/30 transition-all">
+        <i data-lucide="video" class="w-3.5 h-3.5" id="recordIcon"></i>
+        <span id="recordLabel">Record Video</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- LEFT SIDEBAR: CONTROLS & PARAMS -->
+    <aside class="w-80 sm:w-96 bg-studio-900 border-r border-studio-800 flex flex-col shrink-0 z-10">
+      
+      <!-- Tab Navigation -->
+      <div class="flex border-b border-studio-800 bg-studio-850 p-1 gap-1">
+        <button onclick="switchTab('text')" id="tab-btn-text" class="flex-1 py-1.5 text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 bg-indigo-600 text-white transition-all">
+          <i data-lucide="type" class="w-3.5 h-3.5"></i> Text & Motion
+        </button>
+        <button onclick="switchTab('style')" id="tab-btn-style" class="flex-1 py-1.5 text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 text-gray-400 hover:text-white transition-all">
+          <i data-lucide="palette" class="w-3.5 h-3.5"></i> Style & Glow
+        </button>
+        <button onclick="switchTab('stage')" id="tab-btn-stage" class="flex-1 py-1.5 text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 text-gray-400 hover:text-white transition-all">
+          <i data-lucide="layout" class="w-3.5 h-3.5"></i> Stage
+        </button>
+      </div>
+
+      <!-- Controls Accordions Container -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-5">
+
+        <!-- TAB 1: TEXT & MOTION -->
+        <div id="tab-panel-text" class="space-y-5">
+          <!-- Text Input Area -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5 text-indigo-400"></i> Motion Text
+              </label>
+              <span class="text-[10px] text-gray-400">Multi-line supported</span>
+            </div>
+            <textarea id="textInput" rows="2" class="w-full bg-studio-950 border border-studio-700 focus:border-indigo-500 rounded-lg p-2.5 text-sm font-sans tracking-wide text-white focus:outline-none transition-all resize-y" placeholder="Enter your animated title...">KINETIC MOTION</textarea>
+          </div>
+
+          <!-- Motion Animation Selector -->
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-gray-300 flex items-center justify-between">
+              <span class="flex items-center gap-1.5">
+                <i data-lucide="activity" class="w-3.5 h-3.5 text-indigo-400"></i> Motion Animation Type
+              </span>
+              <span id="motionBadge" class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30">Kinetic Split</span>
+            </label>
+            <div class="grid grid-cols-2 gap-2" id="motionButtons">
+              <button onclick="setMotion('kinetic-split')" data-motion="kinetic-split" class="motion-btn active p-2.5 rounded-lg border text-left bg-indigo-600/20 border-indigo-500 text-white flex flex-col gap-1 transition-all">
+                <span class="text-xs font-semibold flex items-center gap-1"><i data-lucide="split" class="w-3 h-3"></i> Kinetic Split</span>
+                <span class="text-[10px] text-gray-400">Staggered 3D reveal</span>
+              </button>
+
+              <button onclick="setMotion('typewriter')" data-motion="typewriter" class="motion-btn p-2.5 rounded-lg border text-left bg-studio-800 border-studio-700 hover:border-gray-500 text-gray-300 flex flex-col gap-1 transition-all">
+                <span class="text-xs font-semibold flex items-center gap-1"><i data-lucide="terminal" class="w-3 h-3"></i> Typewriter</span>
+                <span class="text-[10px] text-gray-400">Blinking caret write-on</span>
+              </button>
+
+              <button onclick="setMotion('glitch')" data-motion="glitch" class="motion-btn p-2.5 rounded-lg border text-left bg-studio-800 border-studio-700 hover:border-gray-500 text-gray-300 flex flex-col gap-1 transition-all">
+                <span class="text-xs font-semibold flex items-center gap-1"><i data-lucide="cpu" class="w-3 h-3"></i> Cyber Glitch</span>
+                <span class="text-[10px] text-gray-400">RGB split & slice</span>
+              </button>
+
+              <button onclick="setMotion('elastic')" data-motion="elastic" class="motion-btn p-2.5 rounded-lg border text-left bg-studio-800 border-studio-700 hover:border-gray-500 text-gray-300 flex flex-col gap-1 transition-all">
+                <span class="text-xs font-semibold flex items-center gap-1"><i data-lucide="trending-up" class="w-3 h-3"></i> Elastic Pop</span>
+                <span class="text-[10px] text-gray-400">Overshoot bounce</span>
+              </button>
+
+              <button onclick="setMotion('liquid-blur')" data-motion="liquid-blur" class="motion-btn p-2.5 rounded-lg border text-left bg-studio-800 border-studio-700 hover:border-gray-500 text-gray-300 flex flex-col gap-1 transition-all">
+                <span class="text-xs font-semibold flex items-center gap-1"><i data-lucide="droplet" class="w-3 h-3"></i> Liquid Blur</span>
+                <span class="text-[10px] text-gray-400">Cinematic lens fade</span>
+              </button>
+
+              <button onclick="setMotion('zoom-shock')" data-motion="zoom-shock" class="motion-btn p-2.5 rounded-lg border text-left bg-studio-800 border-studio-700 hover:border-gray-500 text-gray-300 flex flex-col gap-1 transition-all">
+                <span class="text-xs font-semibold flex items-center gap-1"><i data-lucide="maximize-2" class="w-3 h-3"></i> Zoom Shock</span>
+                <span class="text-[10px] text-gray-400">Scale hit with impact</span>
+              </button>
+
+              <button onclick="setMotion('neon-pulse')" data-motion="neon-pulse" class="motion-btn p-2.5 rounded-lg border text-left bg-studio-800 border-studio-700 hover:border-gray-500 text-gray-300 flex flex-col gap-1 transition-all">
+                <span class="text-xs font-semibold flex items-center gap-1"><i data-lucide="sun" class="w-3 h-3"></i> Neon Pulse</span>
+                <span class="text-[10px] text-gray-400">Flicker & luminescence</span>
+              </button>
+
+              <button onclick="setMotion('floating-wave')" data-motion="floating-wave" class="motion-btn p-2.5 rounded-lg border text-left bg-studio-800 border-studio-700 hover:border-gray-500 text-gray-300 flex flex-col gap-1 transition-all">
+                <span class="text-xs font-semibold flex items-center gap-1"><i data-lucide="waves" class="w-3 h-3"></i> Wave Wiggle</span>
+                <span class="text-[10px] text-gray-400">Sinusoidal motion</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Stagger Unit & Direction -->
+          <div class="grid grid-cols-2 gap-3 pt-2">
+            <div>
+              <label class="text-[11px] font-medium text-gray-400 block mb-1">Animate By</label>
+              <select id="splitUnit" class="w-full bg-studio-950 border border-studio-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                <option value="char" selected>Individual Characters</option>
+                <option value="word">Word by Word</option>
+                <option value="line">Line by Line</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[11px] font-medium text-gray-400 block mb-1">Text Alignment</label>
+              <div class="flex bg-studio-950 border border-studio-700 rounded-lg p-0.5">
+                <button onclick="setTextAlign('left')" id="align-left" class="flex-1 py-1 flex items-center justify-center rounded text-gray-400 hover:text-white">
+                  <i data-lucide="align-left" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="setTextAlign('center')" id="align-center" class="flex-1 py-1 flex items-center justify-center rounded bg-indigo-600 text-white">
+                  <i data-lucide="align-center" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="setTextAlign('right')" id="align-right" class="flex-1 py-1 flex items-center justify-center rounded text-gray-400 hover:text-white">
+                  <i data-lucide="align-right" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Typography Details -->
+          <div class="space-y-3 pt-2 border-t border-studio-800">
+            <label class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+              <i data-lucide="case-sensitive" class="w-3.5 h-3.5 text-indigo-400"></i> Font Family & Styling
+            </label>
+
+            <!-- Font Family -->
+            <div>
+              <label class="text-[11px] text-gray-400 block mb-1">Font Family</label>
+              <select id="fontFamily" class="w-full bg-studio-950 border border-studio-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                <option value="'Syne', sans-serif" selected>Syne (Bold Display / Modern)</option>
+                <option value="'Anton', sans-serif">Anton (Impactful Kinetic)</option>
+                <option value="'Montserrat', sans-serif">Montserrat (Geometric Heavy)</option>
+                <option value="'Playfair Display', serif">Playfair Display (Editorial / Luxury)</option>
+                <option value="'Space Grotesk', sans-serif">Space Grotesk (Tech / Cyber)</option>
+                <option value="'Bungee', cursive">Bungee (Retro Block)</option>
+                <option value="'Bebas Neue', sans-serif">Bebas Neue (Tall Condensed)</option>
+                <option value="'Righteous', cursive">Righteous (Synthwave / Rounded)</option>
+                <option value="'Cinzel', serif">Cinzel (Cinematic Title)</option>
+                <option value="'Outfit', sans-serif">Outfit (Clean Contemporary)</option>
+              </select>
+            </div>
+
+            <!-- Font Size -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-gray-400">
+                <span>Font Size</span>
+                <span id="fontSizeVal">64px</span>
+              </div>
+              <input type="range" id="fontSize" min="20" max="140" value="64" class="w-full">
+            </div>
+
+            <!-- Letter Spacing -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-gray-400">
+                <span>Letter Spacing</span>
+                <span id="letterSpacingVal">2px</span>
+              </div>
+              <input type="range" id="letterSpacing" min="-5" max="25" value="2" class="w-full">
+            </div>
+
+            <!-- Line Height -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-gray-400">
+                <span>Line Height</span>
+                <span id="lineHeightVal">1.1</span>
+              </div>
+              <input type="range" id="lineHeight" min="0.8" max="2.0" step="0.05" value="1.1" class="w-full">
+            </div>
+
+            <!-- Text Transform -->
+            <div class="flex gap-2 pt-1">
+              <button onclick="setTextTransform('uppercase')" id="tt-uppercase" class="flex-1 py-1.5 text-xs bg-indigo-600 rounded text-white font-semibold">UPPER</button>
+              <button onclick="setTextTransform('none')" id="tt-none" class="flex-1 py-1.5 text-xs bg-studio-800 rounded text-gray-300 font-semibold hover:bg-studio-700">Normal</button>
+              <button onclick="setTextTransform('lowercase')" id="tt-lowercase" class="flex-1 py-1.5 text-xs bg-studio-800 rounded text-gray-300 font-semibold hover:bg-studio-700">lower</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: STYLE & GLOW -->
+        <div id="tab-panel-style" class="space-y-5 hidden">
+          <!-- Text Fill Color Mode -->
+          <div class="space-y-3">
+            <label class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+              <i data-lucide="paint-bucket" class="w-3.5 h-3.5 text-indigo-400"></i> Text Fill Style
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="setColorMode('solid')" id="fill-mode-solid" class="py-1.5 text-xs rounded-md bg-indigo-600 text-white font-medium">Solid</button>
+              <button onclick="setColorMode('gradient')" id="fill-mode-grad" class="py-1.5 text-xs rounded-md bg-studio-800 text-gray-300 font-medium hover:bg-studio-700">Gradient</button>
+              <button onclick="setColorMode('outline')" id="fill-mode-outline" class="py-1.5 text-xs rounded-md bg-studio-800 text-gray-300 font-medium hover:bg-studio-700">Stroke Only</button>
+            </div>
+
+            <!-- Solid Color Picker -->
+            <div id="solidColorGroup" class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400">Primary Color</span>
+                <div class="flex items-center gap-2">
+                  <input type="color" id="primaryColor" value="#ffffff" class="w-7 h-7 rounded border border-studio-700 cursor-pointer bg-transparent">
+                  <span id="primaryColorHex" class="text-xs font-mono text-gray-300">#ffffff</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gradient Colors Picker -->
+            <div id="gradientColorGroup" class="space-y-2 hidden">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400">Gradient Start</span>
+                <input type="color" id="gradColor1" value="#38bdf8" class="w-7 h-7 rounded border border-studio-700 cursor-pointer bg-transparent">
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400">Gradient End</span>
+                <input type="color" id="gradColor2" value="#ec4899" class="w-7 h-7 rounded border border-studio-700 cursor-pointer bg-transparent">
+              </div>
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-gray-400">
+                  <span>Gradient Angle</span>
+                  <span id="gradAngleVal">90°</span>
+                </div>
+                <input type="range" id="gradAngle" min="0" max="360" value="90" class="w-full">
+              </div>
+            </div>
+
+            <!-- Stroke Options -->
+            <div id="strokeOptionsGroup" class="space-y-2 pt-2 border-t border-studio-800">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400">Stroke Color</span>
+                <input type="color" id="strokeColor" value="#ffffff" class="w-7 h-7 rounded border border-studio-700 cursor-pointer bg-transparent">
+              </div>
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-gray-400">
+                  <span>Stroke Width</span>
+                  <span id="strokeWidthVal">0px</span>
+                </div>
+                <input type="range" id="strokeWidth" min="0" max="8" value="0" class="w-full">
+              </div>
+            </div>
+          </div>
+
+          <!-- Glow & Neon Effects -->
+          <div class="space-y-3 pt-2 border-t border-studio-800">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+                <i data-lucide="sparkle" class="w-3.5 h-3.5 text-indigo-400"></i> Neon & Drop Glow
+              </label>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="enableGlow" class="sr-only peer">
+                <div class="w-8 h-4 bg-studio-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <div id="glowSubcontrols" class="space-y-2 opacity-50 pointer-events-none transition-all">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400">Glow Color</span>
+                <input type="color" id="glowColor" value="#38bdf8" class="w-7 h-7 rounded border border-studio-700 cursor-pointer bg-transparent">
+              </div>
+              <div class="space-y-1">
+                <div class="flex justify-between text-xs text-gray-400">
+                  <span>Glow Intensity / Blur</span>
+                  <span id="glowRadiusVal">20px</span>
+                </div>
+                <input type="range" id="glowRadius" min="2" max="60" value="20" class="w-full">
+              </div>
+            </div>
+          </div>
+
+          <!-- Chromatic Aberration & Extra FX -->
+          <div class="space-y-3 pt-2 border-t border-studio-800">
+            <label class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-400"></i> Special FX
+            </label>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-gray-400">
+                <span>RGB Split Shift</span>
+                <span id="rgbShiftVal">0px</span>
+              </div>
+              <input type="range" id="rgbShift" min="0" max="15" value="0" class="w-full">
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: STAGE & BACKDROP -->
+        <div id="tab-panel-stage" class="space-y-5 hidden">
+          <!-- Canvas Aspect Ratio -->
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+              <i data-lucide="aspect-ratio" class="w-3.5 h-3.5 text-indigo-400"></i> Aspect Ratio
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="setRatio('16:9', 1280, 720)" class="ratio-btn active py-2 text-xs rounded-lg border bg-indigo-600/20 border-indigo-500 text-white flex flex-col items-center gap-0.5">
+                <span class="font-bold">16:9</span>
+                <span class="text-[9px] text-gray-400">Landscape HD</span>
+              </button>
+              <button onclick="setRatio('9:16', 720, 1280)" class="ratio-btn py-2 text-xs rounded-lg border bg-studio-800 border-studio-700 hover:border-gray-500 text-gray-300 flex flex-col items-center gap-0.5">
+                <span class="font-bold">9:16</span>
+                <span class="text-[9px] text-gray-400">TikTok / Reels</span>
+              </button>
+              <button onclick="setRatio('1:1', 1080, 1080)" class="ratio-btn py-2 text-xs rounded-lg border bg-studio-800 border-studio-700 hover:border-gray-500 text-gray-300 flex flex-col items-center gap-0.5">
+                <span class="font-bold">1:1</span>
+                <span class="text-[9px] text-gray-400">Instagram Post</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Background Type -->
+          <div class="space-y-3 pt-2 border-t border-studio-800">
+            <label class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+              <i data-lucide="image" class="w-3.5 h-3.5 text-indigo-400"></i> Canvas Background
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="setBgType('color')" id="bg-btn-color" class="py-1.5 text-xs rounded-md bg-indigo-600 text-white font-medium">Dark Solid</button>
+              <button onclick="setBgType('grad')" id="bg-btn-grad" class="py-1.5 text-xs rounded-md bg-studio-800 text-gray-300 font-medium hover:bg-studio-700">Studio Mesh</button>
+              <button onclick="setBgType('transparent')" id="bg-btn-trans" class="py-1.5 text-xs rounded-md bg-studio-800 text-gray-300 font-medium hover:bg-studio-700">Transparent</button>
+            </div>
+
+            <!-- Background Color Inputs -->
+            <div id="bgSolidInput" class="flex items-center justify-between">
+              <span class="text-xs text-gray-400">Backdrop Color</span>
+              <input type="color" id="bgColor" value="#0e1117" class="w-7 h-7 rounded border border-studio-700 cursor-pointer bg-transparent">
+            </div>
+
+            <div id="bgGradInput" class="space-y-2 hidden">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400">Mesh Top</span>
+                <input type="color" id="bgGrad1" value="#111827" class="w-7 h-7 rounded border border-studio-700 cursor-pointer bg-transparent">
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400">Mesh Bottom</span>
+                <input type="color" id="bgGrad2" value="#050608" class="w-7 h-7 rounded border border-studio-700 cursor-pointer bg-transparent">
+              </div>
+            </div>
+          </div>
+
+          <!-- Atmospheric Canvas Effects -->
+          <div class="space-y-3 pt-2 border-t border-studio-800">
+            <label class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i> Overlays & Atmosphere
+            </label>
+
+            <!-- Grid Overlay -->
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-400">Cyber Grid Pattern</span>
+              <input type="checkbox" id="overlayGrid" class="rounded bg-studio-800 border-studio-700 text-indigo-600 focus:ring-0">
+            </div>
+
+            <!-- Vignette -->
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-400">Cinematic Vignette</span>
+              <input type="checkbox" id="overlayVignette" checked class="rounded bg-studio-800 border-studio-700 text-indigo-600 focus:ring-0">
+            </div>
+
+            <!-- Floating Ambient Dust -->
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gray-400">Floating Particles</span>
+              <input type="checkbox" id="overlayParticles" checked class="rounded bg-studio-800 border-studio-700 text-indigo-600 focus:ring-0">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick status bar -->
+      <div class="p-3 border-t border-studio-800 bg-studio-950/60 text-[11px] text-gray-400 flex items-center justify-between">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Engine Ready (60fps)
+        </span>
+        <span id="canvasResLabel">1280 × 720</span>
+      </div>
+    </aside>
+
+    <!-- RIGHT WORKSPACE: LIVE CANVAS & TIMELINE -->
+    <main class="flex-1 flex flex-col bg-studio-950 overflow-hidden relative">
+
+      <!-- Viewport Stage -->
+      <div class="flex-1 relative flex items-center justify-center p-6 overflow-hidden" id="stageContainer">
+        
+        <!-- Scaled Canvas Wrapper -->
+        <div id="canvasViewport" class="relative shadow-2xl transition-all duration-300 rounded-xl overflow-hidden border border-studio-700/60 group">
+          <canvas id="motionCanvas" class="block w-full h-full"></canvas>
+        </div>
+
+        <!-- Float Scale / Reset Indicator -->
+        <div class="absolute top-4 right-4 flex items-center gap-2 bg-studio-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-studio-800 text-xs text-gray-400">
+          <i data-lucide="eye" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span id="zoomPercent">Fit</span>
+        </div>
+      </div>
+
+      <!-- BOTTOM TIMELINE CONTROLLER (After Effects Style) -->
+      <footer class="h-28 bg-studio-900 border-t border-studio-800 flex flex-col shrink-0 px-4 py-2 z-10">
+        
+        <!-- Timeline Control Row -->
+        <div class="flex items-center justify-between gap-4 pb-2">
+          <!-- Playback Actions -->
+          <div class="flex items-center gap-2">
+            <button onclick="togglePlay()" id="playPauseBtn" class="w-9 h-9 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 transition-all">
+              <i data-lucide="play" class="w-4 h-4 fill-white" id="playIcon"></i>
+            </button>
+            <button onclick="restartAnimation()" title="Restart" class="w-8 h-8 rounded-lg bg-studio-800 hover:bg-studio-700 text-gray-300 flex items-center justify-center transition-all">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="toggleLoop()" id="loopBtn" title="Toggle Loop" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 text-xs font-medium flex items-center gap-1 transition-all">
+              <i data-lucide="repeat" class="w-3 h-3"></i> Loop On
+            </button>
+          </div>
+
+          <!-- Time Code -->
+          <div class="font-mono text-xs bg-studio-950 px-3 py-1.5 rounded border border-studio-800 text-indigo-300 flex items-center gap-2">
+            <span id="currentTimeDisplay">00:00.00</span>
+            <span class="text-gray-600">/</span>
+            <span id="totalDurationDisplay" class="text-gray-400">03:00.00</span>
+          </div>
+
+          <!-- Speed & Duration -->
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-gray-400">Duration:</span>
+              <select id="durationSelect" class="bg-studio-950 border border-studio-700 text-xs rounded px-2 py-1 text-white focus:outline-none">
+                <option value="1.5">1.5s</option>
+                <option value="2.5">2.5s</option>
+                <option value="3.5" selected>3.5s</option>
+                <option value="5.0">5.0s</option>
+                <option value="8.0">8.0s</option>
+              </select>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-gray-400">Speed:</span>
+              <select id="speedSelect" class="bg-studio-950 border border-studio-700 text-xs rounded px-2 py-1 text-white focus:outline-none">
+                <option value="0.5">0.5x</option>
+                <option value="1" selected>1.0x</option>
+                <option value="1.5">1.5x</option>
+                <option value="2">2.0x</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scrubber Track & Keyframe Area -->
+        <div class="relative flex-1 flex flex-col justify-center">
+          <!-- Time Marker ticks -->
+          <div class="flex justify-between px-1 text-[9px] font-mono text-gray-400 mb-1 select-none pointer-events-none">
+            <span>0.0s</span>
+            <span>25%</span>
+            <span>50%</span>
+            <span>75%</span>
+            <span id="endTick">3.5s</span>
+          </div>
+
+          <!-- Interactive Track -->
+          <div id="timelineTrack" class="relative h-6 bg-studio-950 rounded-md border border-studio-800 cursor-pointer overflow-hidden flex items-center">
+            <!-- Progress Fill Bar -->
+            <div id="timelineProgress" class="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-indigo-600/40 to-indigo-500/60 pointer-events-none" style="width: 0%;"></div>
+            
+            <!-- Stagger Marker Dots Mockup -->
+            <div class="absolute inset-0 flex items-center justify-around pointer-events-none opacity-40 px-4">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+            </div>
+
+            <!-- Scrubber Playhead Thumb -->
+            <div id="playhead" class="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)] transform -translate-x-1/2 pointer-events-none transition-none" style="left: 0%;">
+              <div class="w-3 h-3 bg-indigo-400 border-2 border-white rounded-full -translate-x-1 -translate-y-1"></div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- MODAL / NOTIFICATION TOAST -->
+  <div id="toast" class="fixed bottom-20 right-6 bg-studio-850 border border-indigo-500/40 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+    <div id="toastIcon" class="w-6 h-6 rounded-full bg-indigo-600/30 flex items-center justify-center text-indigo-400">
+      <i data-lucide="check" class="w-4 h-4"></i>
+    </div>
+    <div>
+      <h4 id="toastTitle" class="text-xs font-bold text-white">Export Started</h4>
+      <p id="toastMessage" class="text-[11px] text-gray-300">Rendering kinetic typography animation frames...</p>
+    </div>
+  </div>
+
+  <!-- APPLICATION SCRIPT -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // -------------------------------------------------------------------------
+    // APPLICATION STATE
+    // -------------------------------------------------------------------------
+    const state = {
+      text: "KINETIC MOTION",
+      motion: "kinetic-split", // kinetic-split, typewriter, glitch, elastic, liquid-blur, zoom-shock, neon-pulse, floating-wave
+      splitUnit: "char", // char, word, line
+      textAlign: "center",
+      
+      // Typography
+      fontFamily: "'Syne', sans-serif",
+      fontSize: 64,
+      letterSpacing: 2,
+      lineHeight: 1.1,
+      textTransform: "uppercase",
+
+      // Style & Color
+      colorMode: "solid", // solid, gradient, outline
+      primaryColor: "#ffffff",
+      gradColor1: "#38bdf8",
+      gradColor2: "#ec4899",
+      gradAngle: 90,
+      strokeColor: "#ffffff",
+      strokeWidth: 0,
+      enableGlow: false,
+      glowColor: "#38bdf8",
+      glowRadius: 20,
+      rgbShift: 0,
+
+      // Stage & Canvas
+      width: 1280,
+      height: 720,
+      aspectRatio: "16:9",
+      bgType: "color", // color, grad, transparent
+      bgColor: "#0e1117",
+      bgGrad1: "#111827",
+      bgGrad2: "#050608",
+      overlayGrid: false,
+      overlayVignette: true,
+      overlayParticles: true,
+
+      // Playback
+      isPlaying: true,
+      isLooping: true,
+      currentTime: 0, // In seconds
+      duration: 3.5,  // In seconds
+      speed: 1.0,
+      
+      // Recording
+      isRecording: false
+    };
+
+    // DOM Elements
+    const canvas = document.getElementById('motionCanvas');
+    const ctx = canvas.getContext('2d');
+    const canvasViewport = document.getElementById('canvasViewport');
+    const stageContainer = document.getElementById('stageContainer');
+    const timelineTrack = document.getElementById('timelineTrack');
+    const timelineProgress = document.getElementById('timelineProgress');
+    const playhead = document.getElementById('playhead');
+    const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+    const totalDurationDisplay = document.getElementById('totalDurationDisplay');
+    const playIcon = document.getElementById('playIcon');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const loopBtn = document.getElementById('loopBtn');
+
+    // Ambient Particles Storage
+    let particles = [];
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < 45; i++) {
+        particles.push({
+          x: Math.random() * state.width,
+          y: Math.random() * state.height,
+          radius: Math.random() * 2 + 0.8,
+          alpha: Math.random() * 0.4 + 0.1,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: -Math.random() * 0.5 - 0.1
+        });
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // CANVAS RESIZE & VIEWPORT SCALING
+    // -------------------------------------------------------------------------
+    function resizeCanvas() {
+      canvas.width = state.width;
+      canvas.height = state.height;
+      document.getElementById('canvasResLabel').textContent = `${state.width} × ${state.height}`;
+
+      // Calculate scale to fit nicely in viewport container
+      const containerWidth = stageContainer.clientWidth - 48;
+      const containerHeight = stageContainer.clientHeight - 48;
+      
+      const scaleX = containerWidth / state.width;
+      const scaleY = containerHeight / state.height;
+      const scale = Math.min(scaleX, scaleY, 1.0); // Don't scale up past 100%
+
+      canvasViewport.style.width = `${state.width * scale}px`;
+      canvasViewport.style.height = `${state.height * scale}px`;
+      document.getElementById('zoomPercent').textContent = `${Math.round(scale * 100)}% Fit`;
+
+      if (state.bgType === 'transparent') {
+        canvasViewport.classList.add('checker-bg');
+      } else {
+        canvasViewport.classList.remove('checker-bg');
+      }
+      initParticles();
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // -------------------------------------------------------------------------
+    // EASING EQUATIONS
+    // -------------------------------------------------------------------------
+    function easeOutBack(x) {
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    }
+
+    function easeOutCubic(x) {
+      return 1 - Math.pow(1 - x, 3);
+    }
+
+    function easeInOutQuad(x) {
+      return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+    }
+
+    // -------------------------------------------------------------------------
+    // TEXT PARSING & ITEM GENERATION
+    // -------------------------------------------------------------------------
+    function getRenderItems() {
+      let rawText = state.text;
+      if (state.textTransform === 'uppercase') rawText = rawText.toUpperCase();
+      if (state.textTransform === 'lowercase') rawText = rawText.toLowerCase();
+
+      const lines = rawText.split('\n');
+      const items = [];
+
+      ctx.save();
+      ctx.font = `${state.fontSize}px ${state.fontFamily}`;
+
+      const totalLines = lines.length;
+      const effectiveLineHeight = state.fontSize * state.lineHeight;
+      const totalBlockHeight = (totalLines - 1) * effectiveLineHeight;
+      const startY = (state.height / 2) - (totalBlockHeight / 2);
+
+      let globalIndex = 0;
+
+      lines.forEach((lineStr, lineIdx) => {
+        const lineY = startY + (lineIdx * effectiveLineHeight);
+
+        if (state.splitUnit === 'line') {
+          items.push({
+            text: lineStr,
+            index: globalIndex++,
+            lineIndex: lineIdx,
+            x: getAlignedX(lineStr, state.width),
+            y: lineY,
+            width: ctx.measureText(lineStr).width
+          });
+        } else if (state.splitUnit === 'word') {
+          const words = lineStr.split(' ');
+          const spaceWidth = ctx.measureText(' ').width + state.letterSpacing;
+          let lineWidth = 0;
+          const wordWidths = words.map(w => {
+            const wWidth = ctx.measureText(w).width + (w.length * state.letterSpacing);
+            lineWidth += wWidth;
+            return wWidth;
+          });
+          lineWidth += Math.max(0, words.length - 1) * spaceWidth;
+
+          let curX = getStartX(lineWidth);
+
+          words.forEach((word) => {
+            const wWidth = ctx.measureText(word).width + (word.length * state.letterSpacing);
+            items.push({
+              text: word,
+              index: globalIndex++,
+              lineIndex: lineIdx,
+              x: curX,
+              y: lineY,
+              width: wWidth
+            });
+            curX += wWidth + spaceWidth;
+          });
+        } else {
+          // CHAR SPLIT (DEFAULT)
+          const chars = lineStr.split('');
+          let lineWidth = 0;
+          const charWidths = chars.map(c => {
+            const cw = ctx.measureText(c).width + state.letterSpacing;
+            lineWidth += cw;
+            return cw;
+          });
+
+          let curX = getStartX(lineWidth);
+
+          chars.forEach((char, cIdx) => {
+            const cw = charWidths[cIdx];
+            items.push({
+              text: char,
+              index: globalIndex++,
+              lineIndex: lineIdx,
+              x: curX,
+              y: lineY,
+              width: cw
+            });
+            curX += cw;
+          });
+        }
+      });
+
+      ctx.restore();
+      return { items, totalCount: Math.max(1, globalIndex) };
+    }
+
+    function getStartX(lineWidth) {
+      if (state.textAlign === 'left') return state.width * 0.12;
+      if (state.textAlign === 'right') return state.width * 0.88 - lineWidth;
+      return (state.width / 2) - (lineWidth / 2);
+    }
+
+    function getAlignedX(str, canvasWidth) {
+      const w = ctx.measureText(str).width + (str.length * state.letterSpacing);
+      return getStartX(w);
+    }
+
+    // -------------------------------------------------------------------------
+    // RENDER ENGINE (60 FPS)
+    // -------------------------------------------------------------------------
+    let lastTime = performance.now();
+
+    function renderStage() {
+      // Clear stage
+      ctx.clearRect(0, 0, state.width, state.height);
+
+      // 1. Draw Backdrop
+      drawBackdrop();
+
+      // 2. Draw Optional Overlays (Grid, Particles)
+      if (state.overlayGrid) drawGridOverlay();
+      if (state.overlayParticles) drawParticles();
+
+      // 3. Draw Typography Elements with Motion Transformations
+      drawKineticTypography();
+
+      // 4. Draw Cinematic Vignette
+      if (state.overlayVignette) drawVignette();
+    }
+
+    function drawBackdrop() {
+      if (state.bgType === 'transparent') {
+        // Transparent, let CSS checker show
+        return;
+      }
+
+      if (state.bgType === 'color') {
+        ctx.fillStyle = state.bgColor;
+        ctx.fillRect(0, 0, state.width, state.height);
+      } else if (state.bgType === 'grad') {
+        const grad = ctx.createLinearGradient(0, 0, state.width, state.height);
+        grad.addColorStop(0, state.bgGrad1);
+        grad.addColorStop(1, state.bgGrad2);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, state.width, state.height);
+      }
+    }
+
+    function drawGridOverlay() {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      const step = 40;
+      for (let x = 0; x < state.width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, state.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < state.height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(state.width, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawParticles() {
+      ctx.save();
+      particles.forEach(p => {
+        p.y += p.vy;
+        p.x += p.vx;
+        if (p.y < 0) p.y = state.height;
+        if (p.x < 0) p.x = state.width;
+        if (p.x > state.width) p.x = 0;
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    function drawVignette() {
+      ctx.save();
+      const radius = Math.max(state.width, state.height) * 0.7;
+      const grad = ctx.createRadialGradient(
+        state.width / 2, state.height / 2, radius * 0.2,
+        state.width / 2, state.height / 2, radius
+      );
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.65)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, state.width, state.height);
+      ctx.restore();
+    }
+
+    // -------------------------------------------------------------------------
+    // MOTION LOGIC
+    // -------------------------------------------------------------------------
+    function drawKineticTypography() {
+      const { items, totalCount } = getRenderItems();
+      const progress = Math.min(state.currentTime / state.duration, 1.0);
+
+      // Pre-create fill styles
+      let textFillStyle = state.primaryColor;
+      if (state.colorMode === 'gradient') {
+        const rad = (state.gradAngle * Math.PI) / 180;
+        const x2 = state.width / 2 + Math.cos(rad) * 300;
+        const y2 = state.height / 2 + Math.sin(rad) * 300;
+        const x1 = state.width / 2 - Math.cos(rad) * 300;
+        const y1 = state.height / 2 - Math.sin(rad) * 300;
+        const g = ctx.createLinearGradient(x1, y1, x2, y2);
+        g.addColorStop(0, state.gradColor1);
+        g.addColorStop(1, state.gradColor2);
+        textFillStyle = g;
+      }
+
+      items.forEach(item => {
+        ctx.save();
+
+        // Base Font
+        ctx.font = `${state.fontSize}px ${state.fontFamily}`;
+        ctx.textBaseline = 'middle';
+
+        // Calculate staggered unit progress (0.0 to 1.0)
+        const staggerWindow = 0.55; // 55% of total animation time spent staggering
+        const itemDelay = (item.index / Math.max(1, totalCount)) * staggerWindow;
+        const animDuration = 0.45;  // item animation length
+        const rawLocalP = (progress - itemDelay) / animDuration;
+        const localProgress = Math.min(Math.max(rawLocalP, 0), 1);
+
+        // Motion Variables
+        let posX = item.x;
+        let posY = item.y;
+        let scale = 1;
+        let rotate = 0;
+        let opacity = 1;
+        let filterBlur = 0;
+        let skewX = 0;
+
+        // Apply chosen motion style
+        switch (state.motion) {
+          case 'kinetic-split': {
+            // 3D Staggered slide-in and drop
+            const eased = easeOutBack(localProgress);
+            opacity = localProgress;
+            posY = item.y + (1 - eased) * 90;
+            rotate = (1 - eased) * (item.index % 2 === 0 ? 0.35 : -0.35);
+            scale = 0.5 + eased * 0.5;
+            break;
+          }
+
+          case 'typewriter': {
+            // Step reveal like a mechanical typewriter with blinking cursor
+            const isVisible = localProgress > 0.05;
+            opacity = isVisible ? 1 : 0;
+            // Draw blinking terminal block for active character
+            if (item.index === Math.floor(progress * totalCount) && progress < 0.98) {
+              if (Math.sin(state.currentTime * 12) > 0) {
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillRect(item.x + item.width + 2, item.y - state.fontSize * 0.45, 10, state.fontSize * 0.9);
+              }
+            }
+            break;
+          }
+
+          case 'glitch': {
+            // Cyberpunk RGB jitter & slice
+            const eased = easeOutCubic(localProgress);
+            opacity = localProgress > 0.1 ? 1 : 0;
+            if (progress > 0.2 && Math.random() < 0.25) {
+              posX += (Math.random() - 0.5) * 16;
+              skewX = (Math.random() - 0.5) * 0.4;
+            }
+            break;
+          }
+
+          case 'elastic': {
+            // Bouncy pop from zero
+            const eased = easeOutBack(localProgress);
+            scale = Math.max(0, eased);
+            opacity = Math.min(localProgress * 2, 1);
+            break;
+          }
+
+          case 'liquid-blur': {
+            // Cinematic defocus fade
+            const eased = easeOutCubic(localProgress);
+            opacity = eased;
+            posY = item.y + (1 - eased) * 40;
+            filterBlur = (1 - eased) * 18;
+            break;
+          }
+
+          case 'zoom-shock': {
+            // Zoom in from 3x with camera shake
+            const eased = easeOutCubic(localProgress);
+            scale = 3.0 - (eased * 2.0);
+            opacity = eased;
+            if (localProgress > 0.8 && localProgress < 0.95) {
+              posY += Math.sin(state.currentTime * 45) * 4;
+            }
+            break;
+          }
+
+          case 'neon-pulse': {
+            // Fluorescent bulb flickering alive
+            let flicker = 1;
+            if (localProgress < 0.9) {
+              flicker = Math.random() > 0.3 ? 1 : 0.1;
+            }
+            opacity = flicker * localProgress;
+            break;
+          }
+
+          case 'floating-wave': {
+            // Continuous sine wave wiggle
+            const eased = easeOutCubic(localProgress);
+            opacity = eased;
+            const wave = Math.sin(state.currentTime * 3.5 + item.index * 0.5);
+            posY = item.y + wave * 16;
+            rotate = wave * 0.08;
+            break;
+          }
+        }
+
+        // Apply Blur if supported / computed
+        if (filterBlur > 0.5) {
+          ctx.filter = `blur(${filterBlur}px)`;
+        }
+
+        // Apply Glow / Neon Drop Shadow
+        if (state.enableGlow) {
+          ctx.shadowColor = state.glowColor;
+          ctx.shadowBlur = state.glowRadius;
+        } else {
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+        }
+
+        // Translation & Transforms
+        ctx.globalAlpha = Math.max(0, Math.min(opacity, 1));
+        ctx.translate(posX + item.width / 2, posY);
+        ctx.rotate(rotate);
+        ctx.scale(scale, scale);
+        if (skewX !== 0) ctx.transform(1, 0, skewX, 1, 0, 0);
+
+        // Chromatic Aberration Simulation (Glitch or RGB slider)
+        const shift = Math.max(state.rgbShift, state.motion === 'glitch' ? 3 : 0);
+        if (shift > 0) {
+          // Red Channel
+          ctx.fillStyle = 'rgba(255, 0, 80, 0.7)';
+          renderTextGlyph(item.text, -item.width / 2 - shift, 0);
+
+          // Cyan Channel
+          ctx.fillStyle = 'rgba(0, 240, 255, 0.7)';
+          renderTextGlyph(item.text, -item.width / 2 + shift, 0);
+        }
+
+        // Main Text Drawing
+        ctx.fillStyle = textFillStyle;
+        renderTextGlyph(item.text, -item.width / 2, 0);
+
+        ctx.restore();
+      });
+    }
+
+    function renderTextGlyph(text, x, y) {
+      if (state.colorMode === 'outline') {
+        ctx.strokeStyle = state.strokeColor;
+        ctx.lineWidth = Math.max(1, state.strokeWidth || 2);
+        ctx.strokeText(text, x, y);
+      } else {
+        ctx.fillText(text, x, y);
+        if (state.strokeWidth > 0) {
+          ctx.strokeStyle = state.strokeColor;
+          ctx.lineWidth = state.strokeWidth;
+          ctx.strokeText(text, x, y);
+        }
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // ANIMATION LOOP & PLAYHEAD
+    // -------------------------------------------------------------------------
+    function animateLoop(now) {
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+
+      if (state.isPlaying) {
+        state.currentTime += dt * state.speed;
+
+        if (state.currentTime >= state.duration) {
+          if (state.isLooping && !state.isRecording) {
+            state.currentTime = 0;
+          } else {
+            state.currentTime = state.duration;
+            state.isPlaying = false;
+            updatePlayIcon();
+          }
+        }
+        updateTimelineUI();
+      }
+
+      renderStage();
+      requestAnimationFrame(animateLoop);
+    }
+
+    function updateTimelineUI() {
+      const ratio = Math.min(state.currentTime / state.duration, 1);
+      timelineProgress.style.width = `${ratio * 100}%`;
+      playhead.style.left = `${ratio * 100}%`;
+
+      const curSec = Math.floor(state.currentTime);
+      const curMs = Math.floor((state.currentTime % 1) * 100);
+      currentTimeDisplay.textContent = `00:0${curSec}.${curMs < 10 ? '0' : ''}${curMs}`;
+
+      const totSec = Math.floor(state.duration);
+      const totMs = Math.floor((state.duration % 1) * 100);
+      totalDurationDisplay.textContent = `00:0${totSec}.${totMs < 10 ? '0' : ''}${totMs}`;
+    }
+
+    // -------------------------------------------------------------------------
+    // TIMELINE SCRUBBING & USER INTERACTIONS
+    // -------------------------------------------------------------------------
+    let isScrubbing = false;
+
+    timelineTrack.addEventListener('mousedown', (e) => {
+      isScrubbing = true;
+      scrubTo(e);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isScrubbing) scrubTo(e);
+    });
+
+    window.addEventListener('mouseup', () => {
+      isScrubbing = false;
+    });
+
+    function scrubTo(e) {
+      const rect = timelineTrack.getBoundingClientRect();
+      const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      const percentage = x / rect.width;
+      state.currentTime = percentage * state.duration;
+      updateTimelineUI();
+    }
+
+    function togglePlay() {
+      state.isPlaying = !state.isPlaying;
+      if (state.isPlaying && state.currentTime >= state.duration) {
+        state.currentTime = 0;
+      }
+      updatePlayIcon();
+    }
+
+    function updatePlayIcon() {
+      if (state.isPlaying) {
+        playIcon.setAttribute('data-lucide', 'pause');
+        playPauseBtn.classList.replace('bg-indigo-600', 'bg-amber-600');
+      } else {
+        playIcon.setAttribute('data-lucide', 'play');
+        playPauseBtn.classList.replace('bg-amber-600', 'bg-indigo-600');
+      }
+      lucide.createIcons();
+    }
+
+    function restartAnimation() {
+      state.currentTime = 0;
+      state.isPlaying = true;
+      updatePlayIcon();
+      updateTimelineUI();
+    }
+
+    function toggleLoop() {
+      state.isLooping = !state.isLooping;
+      if (state.isLooping) {
+        loopBtn.classList.remove('opacity-50');
+        loopBtn.innerHTML = `<i data-lucide="repeat" class="w-3 h-3"></i> Loop On`;
+      } else {
+        loopBtn.classList.add('opacity-50');
+        loopBtn.innerHTML = `<i data-lucide="repeat" class="w-3 h-3"></i> Loop Off`;
+      }
+      lucide.createIcons();
+    }
+
+    // -------------------------------------------------------------------------
+    // SIDEBAR TABS & PRESETS
+    // -------------------------------------------------------------------------
+    function switchTab(tabId) {
+      ['text', 'style', 'stage'].forEach(t => {
+        document.getElementById(`tab-panel-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-btn-${t}`);
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('text-gray-400');
+      });
+
+      document.getElementById(`tab-panel-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      activeBtn.classList.add('bg-indigo-600', 'text-white');
+      activeBtn.classList.remove('text-gray-400');
+    }
+
+    function setMotion(motionKey) {
+      state.motion = motionKey;
+      document.querySelectorAll('.motion-btn').forEach(btn => {
+        if (btn.dataset.motion === motionKey) {
+          btn.classList.add('bg-indigo-600/20', 'border-indigo-500', 'text-white');
+          btn.classList.remove('bg-studio-800', 'border-studio-700', 'text-gray-300');
+        } else {
+          btn.classList.remove('bg-indigo-600/20', 'border-indigo-500', 'text-white');
+          btn.classList.add('bg-studio-800', 'border-studio-700', 'text-gray-300');
+        }
+      });
+      document.getElementById('motionBadge').textContent = motionKey.replace('-', ' ').toUpperCase();
+      restartAnimation();
+    }
+
+    function setTextAlign(align) {
+      state.textAlign = align;
+      ['left', 'center', 'right'].forEach(a => {
+        const btn = document.getElementById(`align-${a}`);
+        if (a === align) {
+          btn.classList.add('bg-indigo-600', 'text-white');
+          btn.classList.remove('text-gray-400');
+        } else {
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('text-gray-400');
+        }
+      });
+    }
+
+    function setTextTransform(trans) {
+      state.textTransform = trans;
+      ['uppercase', 'none', 'lowercase'].forEach(t => {
+        const btn = document.getElementById(`tt-${t}`);
+        if (t === trans) {
+          btn.classList.add('bg-indigo-600', 'text-white');
+          btn.classList.remove('bg-studio-800', 'text-gray-300');
+        } else {
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('bg-studio-800', 'text-gray-300');
+        }
+      });
+    }
+
+    function setColorMode(mode) {
+      state.colorMode = mode;
+      ['solid', 'gradient', 'outline'].forEach(m => {
+        const btn = document.getElementById(`fill-mode-${m === 'gradient' ? 'grad' : m}`);
+        if (m === mode) {
+          btn.classList.add('bg-indigo-600', 'text-white');
+          btn.classList.remove('bg-studio-800', 'text-gray-300');
+        } else {
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('bg-studio-800', 'text-gray-300');
+        }
+      });
+
+      document.getElementById('solidColorGroup').classList.toggle('hidden', mode === 'gradient');
+      document.getElementById('gradientColorGroup').classList.toggle('hidden', mode !== 'gradient');
+    }
+
+    function setRatio(ratio, w, h) {
+      state.aspectRatio = ratio;
+      state.width = w;
+      state.height = h;
+
+      document.querySelectorAll('.ratio-btn').forEach(btn => {
+        if (btn.innerText.includes(ratio)) {
+          btn.classList.add('bg-indigo-600/20', 'border-indigo-500', 'text-white');
+          btn.classList.remove('bg-studio-800', 'border-studio-700', 'text-gray-300');
+        } else {
+          btn.classList.remove('bg-indigo-600/20', 'border-indigo-500', 'text-white');
+          btn.classList.add('bg-studio-800', 'border-studio-700', 'text-gray-300');
+        }
+      });
+
+      resizeCanvas();
+    }
+
+    function setBgType(type) {
+      state.bgType = type;
+      ['color', 'grad', 'transparent'].forEach(t => {
+        const btn = document.getElementById(`bg-btn-${t === 'transparent' ? 'trans' : t}`);
+        if (t === type) {
+          btn.classList.add('bg-indigo-600', 'text-white');
+          btn.classList.remove('bg-studio-800', 'text-gray-300');
+        } else {
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('bg-studio-800', 'text-gray-300');
+        }
+      });
+
+      document.getElementById('bgSolidInput').classList.toggle('hidden', type !== 'color');
+      document.getElementById('bgGradInput').classList.toggle('hidden', type !== 'grad');
+      resizeCanvas();
+    }
+
+    // -------------------------------------------------------------------------
+    // FORM INPUT EVENT LISTENERS
+    // -------------------------------------------------------------------------
+    document.getElementById('textInput').addEventListener('input', (e) => {
+      state.text = e.target.value || "TITLE";
+      restartAnimation();
+    });
+
+    document.getElementById('splitUnit').addEventListener('change', (e) => {
+      state.splitUnit = e.target.value;
+      restartAnimation();
+    });
+
+    document.getElementById('fontFamily').addEventListener('change', (e) => {
+      state.fontFamily = e.target.value;
+    });
+
+    document.getElementById('fontSize').addEventListener('input', (e) => {
+      state.fontSize = parseInt(e.target.value);
+      document.getElementById('fontSizeVal').textContent = `${state.fontSize}px`;
+    });
+
+    document.getElementById('letterSpacing').addEventListener('input', (e) => {
+      state.letterSpacing = parseInt(e.target.value);
+      document.getElementById('letterSpacingVal').textContent = `${state.letterSpacing}px`;
+    });
+
+    document.getElementById('lineHeight').addEventListener('input', (e) => {
+      state.lineHeight = parseFloat(e.target.value);
+      document.getElementById('lineHeightVal').textContent = state.lineHeight;
+    });
+
+    document.getElementById('primaryColor').addEventListener('input', (e) => {
+      state.primaryColor = e.target.value;
+      document.getElementById('primaryColorHex').textContent = e.target.value;
+    });
+
+    document.getElementById('gradColor1').addEventListener('input', (e) => { state.gradColor1 = e.target.value; });
+    document.getElementById('gradColor2').addEventListener('input', (e) => { state.gradColor2 = e.target.value; });
+    document.getElementById('gradAngle').addEventListener('input', (e) => {
+      state.gradAngle = parseInt(e.target.value);
+      document.getElementById('gradAngleVal').textContent = `${state.gradAngle}°`;
+    });
+
+    document.getElementById('strokeColor').addEventListener('input', (e) => { state.strokeColor = e.target.value; });
+    document.getElementById('strokeWidth').addEventListener('input', (e) => {
+      state.strokeWidth = parseInt(e.target.value);
+      document.getElementById('strokeWidthVal').textContent = `${state.strokeWidth}px`;
+    });
+
+    document.getElementById('enableGlow').addEventListener('change', (e) => {
+      state.enableGlow = e.target.checked;
+      const sub = document.getElementById('glowSubcontrols');
+      if (state.enableGlow) {
+        sub.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        sub.classList.add('opacity-50', 'pointer-events-none');
+      }
+    });
+
+    document.getElementById('glowColor').addEventListener('input', (e) => { state.glowColor = e.target.value; });
+    document.getElementById('glowRadius').addEventListener('input', (e) => {
+      state.glowRadius = parseInt(e.target.value);
+      document.getElementById('glowRadiusVal').textContent = `${state.glowRadius}px`;
+    });
+
+    document.getElementById('rgbShift').addEventListener('input', (e) => {
+      state.rgbShift = parseInt(e.target.value);
+      document.getElementById('rgbShiftVal').textContent = `${state.rgbShift}px`;
+    });
+
+    document.getElementById('bgColor').addEventListener('input', (e) => { state.bgColor = e.target.value; });
+    document.getElementById('bgGrad1').addEventListener('input', (e) => { state.bgGrad1 = e.target.value; });
+    document.getElementById('bgGrad2').addEventListener('input', (e) => { state.bgGrad2 = e.target.value; });
+
+    document.getElementById('overlayGrid').addEventListener('change', (e) => { state.overlayGrid = e.target.checked; });
+    document.getElementById('overlayVignette').addEventListener('change', (e) => { state.overlayVignette = e.target.checked; });
+    document.getElementById('overlayParticles').addEventListener('change', (e) => { state.overlayParticles = e.target.checked; });
+
+    document.getElementById('durationSelect').addEventListener('change', (e) => {
+      state.duration = parseFloat(e.target.value);
+      document.getElementById('endTick').textContent = `${state.duration}s`;
+      restartAnimation();
+    });
+
+    document.getElementById('speedSelect').addEventListener('change', (e) => {
+      state.speed = parseFloat(e.target.value);
+    });
+
+    // -------------------------------------------------------------------------
+    // PRESETS SYSTEM
+    // -------------------------------------------------------------------------
+    function loadPreset(name) {
+      if (name === 'cyberpunk') {
+        state.text = "CYBER//REBEL\nNIGHT CITY";
+        state.fontFamily = "'Space Grotesk', sans-serif";
+        state.fontSize = 62;
+        state.primaryColor = "#facc15";
+        state.strokeColor = "#00f0ff";
+        state.strokeWidth = 1;
+        state.enableGlow = true;
+        state.glowColor = "#00f0ff";
+        state.glowRadius = 25;
+        state.rgbShift = 4;
+        state.overlayGrid = true;
+        state.bgColor = "#090a0f";
+        setMotion('glitch');
+      } else if (name === 'minimal') {
+        state.text = "ATELIER\nSPRING COLLECTION";
+        state.fontFamily = "'Playfair Display', serif";
+        state.fontSize = 58;
+        state.primaryColor = "#f4f4f5";
+        state.strokeWidth = 0;
+        state.enableGlow = false;
+        state.rgbShift = 0;
+        state.overlayGrid = false;
+        state.overlayParticles = false;
+        state.bgType = "color";
+        state.bgColor = "#18181b";
+        setMotion('liquid-blur');
+      } else if (name === 'hypebeast') {
+        state.text = "UNSTOPPABLE\nENERGY 2026";
+        state.fontFamily = "'Anton', sans-serif";
+        state.fontSize = 80;
+        state.primaryColor = "#ef4444";
+        state.strokeWidth = 0;
+        state.enableGlow = false;
+        state.rgbShift = 2;
+        state.overlayGrid = false;
+        state.overlayParticles = true;
+        setMotion('elastic');
+      } else if (name === 'synthwave') {
+        state.text = "OUTRUN\nNEON HORIZON";
+        state.fontFamily = "'Righteous', cursive";
+        state.fontSize = 66;
+        setColorMode('gradient');
+        state.gradColor1 = "#f43f5e";
+        state.gradColor2 = "#38bdf8";
+        state.enableGlow = true;
+        state.glowColor = "#f43f5e";
+        state.glowRadius = 30;
+        state.overlayGrid = true;
+        setMotion('floating-wave');
+      } else if (name === 'cinema') {
+        state.text = "CHRONICLES\nOF TOMORROW";
+        state.fontFamily = "'Cinzel', serif";
+        state.fontSize = 56;
+        state.letterSpacing = 8;
+        setColorMode('solid');
+        state.primaryColor = "#fef08a";
+        state.enableGlow = true;
+        state.glowColor = "#ca8a04";
+        state.glowRadius = 15;
+        state.overlayVignette = true;
+        state.overlayParticles = true;
+        setMotion('kinetic-split');
+      }
+
+      // Sync form inputs
+      document.getElementById('textInput').value = state.text;
+      document.getElementById('fontFamily').value = state.fontFamily;
+      document.getElementById('fontSize').value = state.fontSize;
+      document.getElementById('fontSizeVal').textContent = `${state.fontSize}px`;
+      document.getElementById('enableGlow').checked = state.enableGlow;
+      document.getElementById('overlayGrid').checked = state.overlayGrid;
+      restartAnimation();
+      showToast("Preset Loaded", `Switched styling to ${name.toUpperCase()}`);
+    }
+
+    // -------------------------------------------------------------------------
+    // EXPORT CAPTURE & RECORDING (MediaRecorder API)
+    // -------------------------------------------------------------------------
+    function captureSnapshot() {
+      const dataUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `KineticTitle-${Date.now()}.png`;
+      a.click();
+      showToast("Snapshot Saved", "Rendered canvas exported as PNG high-res.");
+    }
+
+    let mediaRecorder = null;
+    let recordedChunks = [];
+
+    function toggleRecording() {
+      if (state.isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+
+    function startRecording() {
+      try {
+        state.isRecording = true;
+        recordedChunks = [];
+        
+        // Prepare clean playback cycle
+        state.currentTime = 0;
+        state.isPlaying = true;
+        updatePlayIcon();
+
+        const stream = canvas.captureStream(60); // 60 FPS
+        const options = { mimeType: 'video/webm;codecs=vp9' };
+        
+        try {
+          mediaRecorder = new MediaRecorder(stream, options);
+        } catch (e) {
+          mediaRecorder = new MediaRecorder(stream);
+        }
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `KineticTypography-${Date.now()}.webm`;
+          a.click();
+          showToast("Video Export Ready", "WebM animation successfully rendered.");
+          resetRecordButton();
+        };
+
+        mediaRecorder.start();
+
+        // UI Updates
+        const recordBtn = document.getElementById('recordBtn');
+        const recordLabel = document.getElementById('recordLabel');
+        const recordIcon = document.getElementById('recordIcon');
+        recordBtn.classList.replace('bg-indigo-600', 'bg-red-600');
+        recordBtn.classList.replace('hover:bg-indigo-500', 'hover:bg-red-500');
+        recordLabel.textContent = "Recording...";
+        recordIcon.setAttribute('data-lucide', 'circle-dot');
+        lucide.createIcons();
+
+        showToast("Recording Video", `Capturing full cycle (${state.duration}s)...`);
+
+        // Automatically stop when the loop duration concludes
+        setTimeout(() => {
+          if (state.isRecording) stopRecording();
+        }, (state.duration / state.speed) * 1000 + 150);
+
+      } catch (err) {
+        console.error(err);
+        state.isRecording = false;
+        showToast("Recording Failed", "MediaRecorder is not supported in this browser.");
+      }
+    }
+
+    function stopRecording() {
+      if (!state.isRecording) return;
+      state.isRecording = false;
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      resetRecordButton();
+    }
+
+    function resetRecordButton() {
+      const recordBtn = document.getElementById('recordBtn');
+      const recordLabel = document.getElementById('recordLabel');
+      const recordIcon = document.getElementById('recordIcon');
+      recordBtn.classList.replace('bg-red-600', 'bg-indigo-600');
+      recordBtn.classList.replace('hover:bg-red-500', 'hover:bg-indigo-500');
+      recordLabel.textContent = "Record Video";
+      recordIcon.setAttribute('data-lucide', 'video');
+      lucide.createIcons();
+    }
+
+    // -------------------------------------------------------------------------
+    // TOAST NOTIFICATIONS
+    // -------------------------------------------------------------------------
+    let toastTimeout;
+    function showToast(title, msg) {
+      clearTimeout(toastTimeout);
+      const toast = document.getElementById('toast');
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMessage').textContent = msg;
+
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3500);
+    }
+
+    // -------------------------------------------------------------------------
+    // BOOTSTRAP APPLICATION
+    // -------------------------------------------------------------------------
+    window.onload = function () {
+      resizeCanvas();
+      updateTimelineUI();
+      lastTime = performance.now();
+      requestAnimationFrame(animateLoop);
+    };
+  </script>
+</body>
+</html>
