@@ -1,5 +1,7 @@
 # KineticForge (Next.js)
 
+## Build by Fazle Elahi Fahim
+
 Kinetic typography motion studio — Next.js 15 (App Router) + TypeScript + Tailwind 3.
 
 ```bash
